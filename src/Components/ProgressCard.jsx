@@ -1,10 +1,24 @@
 import React from 'react'
 
-const ProgressCard = () => {
+const ProgressCard = ({completedTasks}) => {
+  const b = completedTasks.length
+  const progress = (b/4)*100
+
   return (
-    <section>
-        <h2>Today's Progress</h2>
-        <p>0%</p>
+    <section className="progress-card">
+      <div className="progress-top">
+            <h2>Today's Progress</h2>
+            <span>{progress}%</span>
+      </div>
+      <div className='progress-bar'>
+        <div 
+        className="progress-fill"
+        style={{ width : `${progress}%`}}
+        >
+        </div>
+      </div>
+      <p>{completedTasks.length} of 4 tasks completed</p>
+        
     </section>
   )
 }
