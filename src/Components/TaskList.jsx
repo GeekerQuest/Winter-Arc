@@ -1,73 +1,86 @@
-import React from 'react'
+import { useState } from "react";
 
-const TaskList = ({ completedTasks, setcompletedTasks }) => {
+const TaskList = ({ tasks, customTaskIds, completedTasks, setdailyTasks, setCustomTasks, todayKey }) => {
+  const [newTaskName, setNewTaskName] = useState("");
+  const [taskMessage, setTaskMessage] = useState("");
+
   const handleTaskChange = (e) => {
-    if (e.target.checked) {
-      setcompletedTasks(prev => [
-        ...prev,e.target.value
-      ]);
-    } else {
-      // completedTasks = completedTasks.filter(val => val !== e.target.value) //const value cannot be modified
-      setcompletedTasks( prev =>
-              prev.filter(val => val !== e.target.value)
-      );
+    const taskId = e.target.value;
+    const checked = e.target.checked;
+
+    setdailyTasks((prev) => {
+      const todayTasks = prev[todayKey] || [];
+
+      if (checked) {
+        return { ...prev, [todayKey]: [...new Set([...todayTasks, taskId])] };
+      }
+      return {
+        ...prev,
+        [todayKey]: todayTasks.filter((value) => value !== taskId),
+      };
+    });
+  };
+
+  const handleAddTask = (event) => {
+    event.preventDefault();
+    const name = newTaskName.trim();
+    if (!name) return;
+
+    const alreadyExists = tasks.some((task) => task.name.toLowerCase() === name.toLowerCase());
+    if (alreadyExists) {
+      setTaskMessage("That task is already on your list.");
+      return;
     }
-  }
-  const tasks = [
-    {
-      id: "squats",
-      name: "15 Squats - 2 reps"
-    },
-    {
-      id: "climbers",
-      name: "20 Mountain Climbers"
-    },
-    {
-      id: "jacks",
-      name: "20 Jumping Jacks"
-    },
-    {
-      id: "pushups",
-      name: "20 Inclined PushUps"
-    }
-  ];
+
+    setCustomTasks((currentTasks) => [
+      ...currentTasks,
+      { id: `custom-${crypto.randomUUID()}`, name, createdOn: todayKey },
+    ]);
+    setNewTaskName("");
+    setTaskMessage("Task added.");
+  };
+
   return (
-    <section className='Task-Card'>
-      <div className='task-head'>
+    <section className="Task-Card">
+      <div className="task-head">
         <h2>Today's Tasks</h2>
       </div>
-      <div className='task-list'>
+      <form className="add-task-form" onSubmit={handleAddTask}>
+        <label className="visually-hidden" htmlFor="new-task-name">New task name</label>
+        <input
+          id="new-task-name"
+          type="text"
+          value={newTaskName}
+          onChange={(event) => setNewTaskName(event.target.value)}
+          placeholder="Add a task for yourself..."
+          maxLength={60}
+        />
+        <button type="submit">+ Add task</button>
+      </form>
+      <p className="task-form-message" aria-live="polite">{taskMessage || "Your own habits can go here."}</p>
+
+      <div className="task-list">
         <ul>
-          {/* Learned New */}
           {tasks.map((task) => (
-            <li key={task.id}>
-
-              <label>
-
+            <li className={customTaskIds.has(task.id) ? "custom-task" : ""} key={task.id}>
+              <label className="task-item">
                 <span
-                  className={
-                    completedTasks.includes(task.id)
-                      ? "completed"
-                      : ""
-                  }
+                  className={completedTasks.includes(task.id) ? "completed" : ""}
                 >
                   {task.name}
                 </span>
-
                 <input
                   type="checkbox"
                   value={task.id}
                   checked={completedTasks.includes(task.id)}
                   onChange={handleTaskChange}
                 />
-
               </label>
-
             </li>
           ))}
         </ul>
       </div>
-      <p>Completed: {completedTasks.join(", ")}</p>
+      <p className="completed-summary">Completed: {completedTasks.length} of {tasks.length}</p>
     </section>
   )
 }
