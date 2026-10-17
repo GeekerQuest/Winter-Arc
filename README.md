@@ -1,4 +1,4 @@
-# Winter-Arc (An enhanced To-do desigin layout for 90 days committment)
+# Winter-Arc (An enhanced To-do design layout for 90 days committment)
 
 
 
